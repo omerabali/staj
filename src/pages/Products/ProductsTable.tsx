@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getProducts } from '../../api/products';
 import { normalizeProduct } from '../../utils/normalizeProduct';
@@ -17,6 +17,15 @@ export const ProductsTable = () => {
     // --- States for Sorting ---
     const [sortCol, setSortCol] = useState<SortColumn>('name');
     const [sortDir, setSortDir] = useState<SortDirection>('asc');
+
+    // --- States for Pagination ---
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 5;
+
+    // Reset pagination to page 1 when any filter or sort changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, filterCategory, filterStockStatus, glitchOnly, sortCol, sortDir]);
 
     // --- React Query Fetch ---
     const { data: rawProducts = [], isLoading, isError } = useQuery({
@@ -69,6 +78,13 @@ export const ProductsTable = () => {
             setSortDir('asc');
         }
     };
+
+    // --- Calculate Pagination ---
+    const totalPages = Math.ceil(filteredData.length / itemsPerPage) || 1;
+    const paginatedData = filteredData.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
 
     if (isLoading) return <div className="p-8 text-center text-gray-500">Loading (simulating fetch)...</div>;
     if (isError) return <div className="p-8 text-center text-red-500">Error fetching products.</div>;
@@ -131,6 +147,7 @@ export const ProductsTable = () => {
                             </th>
                             <th className="px-6 py-4">Stock</th>
                             <th className="px-6 py-4">Category</th>
+                            <th className="px-6 py-4">Updated At</th>
                             <th className="px-6 py-4 cursor-pointer hover:bg-gray-200" onClick={() => toggleSort('glitchScore')}>
                                 Glitch Score {sortCol === 'glitchScore' && (sortDir === 'asc' ? '↑' : '↓')}
                             </th>
@@ -138,14 +155,14 @@ export const ProductsTable = () => {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
-                        {filteredData.length === 0 ? (
+                        {paginatedData.length === 0 ? (
                             <tr>
-                                <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                                <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
                                     No products found.
                                 </td>
                             </tr>
                         ) : (
-                            filteredData.map((product) => (
+                            paginatedData.map((product) => (
                                 <tr key={product.id} className="hover:bg-gray-50/50 transition-colors">
                                     <td className="px-6 py-4 font-medium text-gray-800">{product.name}</td>
                                     <td className="px-6 py-4">${product.price.toFixed(2)}</td>
@@ -153,13 +170,16 @@ export const ProductsTable = () => {
                                         {product.stock}
                                     </td>
                                     <td className="px-6 py-4 text-gray-600">{product.category}</td>
+                                    <td className="px-6 py-4 text-gray-500 text-sm">
+                                        {product.updatedAt ? new Date(product.updatedAt).toLocaleDateString() : '-'}
+                                    </td>
                                     <td className="px-6 py-4">
                                         <span
                                             className={`px-3 py-1 rounded-full text-xs font-bold ${product.glitchScore >= 50
-                                                    ? 'bg-red-100 text-red-700'
-                                                    : product.glitchScore > 0
-                                                        ? 'bg-orange-100 text-orange-700'
-                                                        : 'bg-green-100 text-green-700'
+                                                ? 'bg-red-100 text-red-700'
+                                                : product.glitchScore > 0
+                                                    ? 'bg-orange-100 text-orange-700'
+                                                    : 'bg-green-100 text-green-700'
                                                 }`}
                                         >
                                             Score: {product.glitchScore}
@@ -185,6 +205,31 @@ export const ProductsTable = () => {
                     </tbody>
                 </table>
             </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+                <div className="flex justify-between items-center mt-4 pt-4 border-t">
+                    <div className="text-sm text-gray-600">
+                        Showing page <span className="font-bold">{currentPage}</span> of {totalPages}
+                    </div>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                            disabled={currentPage === 1}
+                            className="px-4 py-2 border rounded-md hover:bg-gray-50 disabled:opacity-50 text-sm font-medium transition"
+                        >
+                            Previous
+                        </button>
+                        <button
+                            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                            disabled={currentPage === totalPages}
+                            className="px-4 py-2 border rounded-md hover:bg-gray-50 disabled:opacity-50 text-sm font-medium transition"
+                        >
+                            Next
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

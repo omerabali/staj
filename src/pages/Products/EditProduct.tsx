@@ -53,12 +53,23 @@ export const EditProduct = () => {
     // Mutation for updating data
     const updateMutation = useMutation({
         mutationFn: (data: ProductFormData) => updateProduct(id!, data),
-        onSuccess: (updatedRaw) => {
+        onSuccess: (updatedRaw, variables) => {
             // Create local Audit Log mapping on console (as required by case)
+            const changes: string[] = [];
+            const oldNorm = rawProduct ? normalizeProduct(rawProduct) : null;
+
+            if (oldNorm) {
+                if (oldNorm.name !== variables.name) changes.push(`name changed from '${oldNorm.name}' to '${variables.name}'`);
+                if (oldNorm.price !== variables.price) changes.push(`price changed from ${oldNorm.price} to ${variables.price}`);
+                if (oldNorm.stock !== variables.stock) changes.push(`stock changed from ${oldNorm.stock} to ${variables.stock}`);
+                if (oldNorm.category !== variables.category) changes.push(`category changed from '${oldNorm.category}' to '${variables.category}'`);
+            }
+
             const auditLog = {
                 timestamp: new Date().toISOString(),
                 productId: id,
                 action: 'UPDATE',
+                changes: changes.length > 0 ? changes : ['No meaningful fields changed'],
                 newRawData: updatedRaw,
             };
             console.log('--- AUDIT LOG ---', JSON.stringify(auditLog, null, 2));

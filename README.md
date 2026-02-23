@@ -1,73 +1,81 @@
-# React + TypeScript + Vite
+# Glitch Market Admin Panel
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Bu proje, "Glitch Market" platformu için geliştirilmiş, tutarsız ve "bozuk" (glitch'li) ürün verilerini yöneten profesyonel bir admin paneli mülakat çalışmasıdır. Projenin temel odağı, kirli veriyi normalize etmek ve bu süreçleri şeffaf bir şekilde yöneticiye sunmaktır.
 
-Currently, two official plugins are available:
+## �️ Kurulum ve Çalıştırma
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Projeyi yerel ortamınızda ayağa kaldırmak için:
 
-## React Compiler
+1. Bağımlılıkları yükleyin:
+   ```bash
+   npm install
+   ```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+2. Geliştirme sunucusunu başlatın:
+   ```bash
+   npm run dev
+   ```
 
-## Expanding the ESLint configuration
+3. Tarayıcıda açın: `http://localhost:5173`
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 📂 Klasör Yapısı
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```text
+src/
+├── api/            # Fake API katmanı (setTimeout & simüle DB)
+├── components/     # UI Bileşenleri (Layout, Button vb.)
+├── data/           # Mock JSON verisi (Ham/Bozuk veri kaynağı)
+├── pages/          # Sayfa bileşenleri (Table, Detail, Edit)
+├── types/          # TypeScript arayüz tanımları (RawProduct, Product)
+├── utils/          # Normalizasyon ve yardımcı fonksiyonlar (Logic)
+└── App.tsx         # Routing ve Query Provider yapılandırması
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 🧠 Mimari ve Veri Akışı (Data Flow)
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Uygulama **"Unidirectional Data Flow"** (Tek Yönlü Veri Akışı) prensibiyle çalışır:
+1. **Fetch:** `api/products.ts` üzerinden "ham" (Raw) veri çekilir.
+2. **Handle:** `@tanstack/react-query` bu veriyi yönetir ve önbelleğe alır.
+3. **Normalize:** Veri UI'a ulaşmadan hemen önce `normalizeProduct` katmanından geçer.
+4. **Display:** UI, sadece temizlenmiş (Normalized) ve tip güvenliği sağlanmış veriyi gösterir.
+
+---
+
+## ⚠️ Glitch Handling (Hata Yönetimi) Stratejisi
+
+Uygulama, verideki kusurları sadece düzeltmekle kalmaz, bunları "Glitch Score" adında bir metriğe dönüştürür.
+
+### Nasıl Normalize Ediyoruz?
+- **Fiyat (Price):** "12,90" gibi string formatları regex ile temizlenip sayıya çevrilir. Hatalıysa +30 puan eklenir.
+- **Stok (Stock):** Negatif değerler mutlak sıfıra çekilir. Hatalıysa +20 puan eklenir.
+- **Kategori (Category):** Dizi olarak gelen kategorilerin ilk elemanı seçilir, boşsa "Uncategorized" atanır. +15 puan eklenir.
+- **Tarih (UpdatedAt):** Geçersiz tarihler `null` değerine çekilir veya fallback atanır. +20 puan eklenir.
+- **İsim (Name):** Boş veya tanımsız isimler "Unknown Product" olarak normalize edilir. +20 puan eklenir.
+
+### Edge-Case Yaklaşımı
+Veri tipi tamamen beklenmedik bir formatta gelirse (örneğin fiyatın nesne gelmesi), uygulama çökmemesi için `try-catch` benzeri korumacı bir mantıkla varsayılan değerleri basar ve bu durumu `glitchReport` içinde admin'e raporlar.
+
+---
+
+## ✨ Bonus Özellikler
+
+- **Gelişmiş Audit Log:** Her düzenleme (Edit) işleminde, hangi alanın eski değerden yeni değere geçtiği konsola detaylı bir JSON raporu olarak basılır.
+- **Glitch Score Badges:** Hata skoruna göre (0-100) renk değiştiren (Yeşil, Turuncu, Kırmızı) görsel göstergeler.
+- **Pagination & Sorting:** Client-side sayfalama ve 3 farklı kolonda (İsim, Fiyat, Skor) sıralama desteği.
+
+---
+
+## 🤖 AI Kullanımı ve Şeffaflık
+
+Bu proje geliştirilirken **Antigravity AI (Gemini)** aracı yoğun bir şekilde kullanılmıştır. AI şu alanlarda destek vermiştir:
+- **Normalizasyon Algoritması:** Karmaşık kirli veri senaryoları için esnek regex ve kontrol yapıları tasarlanırken beyin fırtunası yapılmıştır.
+- **UI/UX Tasarımı:** Tailwind CSS ile modern, "glassmorphism" esintili ve kullanıcı dostu bir admin tema oluşturulmasında AI önerilerinden faydalanılmıştır.
+- **Type Safety:** TypeScript interface yapılarının "Raw" ve "Normalized" olarak ayrıştırılmasında AI'nın sağladığı yapısal öneriler projenin sağlamlığını artırmıştır.
+
+---
+_Bu çalışma, Glitch Market Frontend Case gerekliliklerine göre özenle hazırlanmıştır._
+

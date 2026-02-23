@@ -1,4 +1,4 @@
-import { RawProduct, Product, GlitchIssue } from '../types/product';
+import type { RawProduct, Product, GlitchIssue } from '../types/product';
 
 export function normalizeProduct(raw: RawProduct): Product {
     const issues: GlitchIssue[] = [];

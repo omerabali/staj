@@ -1,5 +1,8 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { ProductsTable } from './pages/Products/ProductsTable';
+import { ProductDetail } from './pages/Products/ProductDetail';
+import { EditProduct } from './pages/Products/EditProduct';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -22,9 +25,9 @@ function App() {
           <main>
             <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
               <Routes>
-                <Route path="/products" element={<div className="p-4 bg-white rounded shadow text-center">Products Table Placeholder (Faz 7)</div>} />
-                <Route path="/products/:id" element={<div className="p-4 bg-white rounded shadow text-center">Product Detail Placeholder (Faz 8)</div>} />
-                <Route path="/products/:id/edit" element={<div className="p-4 bg-white rounded shadow text-center">Edit Product Placeholder (Faz 9)</div>} />
+                <Route path="/products" element={<ProductsTable />} />
+                <Route path="/products/:id" element={<ProductDetail />} />
+                <Route path="/products/:id/edit" element={<EditProduct />} />
                 <Route path="/" element={<Navigate to="/products" replace />} />
               </Routes>
             </div>

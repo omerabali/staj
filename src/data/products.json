@@ -1,0 +1,91 @@
+[
+    {
+        "id": "1",
+        "name": "Wireless Mouse",
+        "price": "12,90",
+        "stock": 45,
+        "category": [
+            "Electronics",
+            "Accessories"
+        ],
+        "updatedAt": "2023-14-55T00:00:00.000Z"
+    },
+    {
+        "id": "2",
+        "name": "Mechanical Keyboard 🌈",
+        "price": 89.99,
+        "stock": -5,
+        "category": "Electronics",
+        "updatedAt": "2024-02-15T10:30:00.000Z"
+    },
+    {
+        "id": "3",
+        "name": "",
+        "price": "0,00",
+        "stock": 0,
+        "category": [
+            "Unknown"
+        ],
+        "updatedAt": "Invalid Date"
+    },
+    {
+        "id": "4",
+        "name": "Bluetooth Headphones",
+        "price": 120.50,
+        "stock": 12,
+        "category": null,
+        "updatedAt": "2024-01-20T14:45:00.000Z"
+    },
+    {
+        "id": "5",
+        "name": "Gaming Monitor 144Hz 🖥️🔥",
+        "price": "299,99",
+        "stock": -10,
+        "category": "Monitors",
+        "updatedAt": "Not a date"
+    },
+    {
+        "id": "6",
+        "name": "Ergonomic Office Chair",
+        "price": 199.00,
+        "stock": 50,
+        "category": "Furniture",
+        "updatedAt": "2024-02-01T08:15:00.000Z"
+    },
+    {
+        "id": "7",
+        "name": "USB-C Hub",
+        "price": "25,00",
+        "stock": 100,
+        "category": [
+            "Accessories",
+            "Computers",
+            "Adapters"
+        ],
+        "updatedAt": "2024-02-23T09:00:00.000Z"
+    },
+    {
+        "id": "8",
+        "name": "Webcam 1080p 📸",
+        "price": 45.99,
+        "stock": -2,
+        "category": "Electronics",
+        "updatedAt": "2024-02-24T00:00:00.000Z"
+    },
+    {
+        "id": "9",
+        "name": "Laptop Stand",
+        "price": "15,50",
+        "stock": -15,
+        "category": "Accessories",
+        "updatedAt": "2023-11-31T25:00:00.000Z"
+    },
+    {
+        "id": "10",
+        "name": "Desk Pad",
+        "price": 19.99,
+        "stock": 200,
+        "category": "Office",
+        "updatedAt": "2024-02-20T16:20:00.000Z"
+    }
+]
